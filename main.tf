@@ -82,7 +82,7 @@ resource "aws_security_group" "proj-sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["172.31.16.148>/32"] # Replace with your Jenkins server IP
+    cidr_blocks = ["0.0.0.0/0"] # Replace with your Jenkins server IP
   }
 
   ingress {
