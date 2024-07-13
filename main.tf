@@ -29,12 +29,14 @@ resource "aws_internet_gateway" "proj-ig" {
 # Setting up the route table
 resource "aws_route_table" "proj-rt" {
   vpc_id = aws_vpc.proj-vpc.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.proj-ig.id
   }
-
+  route {
+    ipv6_cidr_block = "::/0"
+    gateway_id = aws_internet_gateway.proj-ig.id
+  }
   tags = {
     Name = "rt1"
   }
@@ -44,8 +46,7 @@ resource "aws_route_table" "proj-rt" {
 resource "aws_subnet" "proj-subnet" {
   vpc_id            = aws_vpc.proj-vpc.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"  # Use a valid availability zone
-
+  availability_zone = "us-east-1a"  # Update to us-east-1a
   tags = {
     Name = "subnet1"
   }
@@ -62,35 +63,12 @@ resource "aws_security_group" "proj-sg" {
   name        = "proj-sg"
   description = "Enable web traffic for the project"
   vpc_id      = aws_vpc.proj-vpc.id
-
+  
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTP traffic"
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTPS traffic"
-  }
- ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Replace with your Jenkins server IP
-  }
-
-  ingress {
-    from_port   = 65000
-    to_port     = 65000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow traffic on port 65000"
   }
 
   egress {
@@ -98,6 +76,38 @@ resource "aws_security_group" "proj-sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  ingress {
+    description = "HTTPS traffic"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  ingress {
+    description = "HTTP traffic"
+    from_port   = 0
+    to_port     = 65000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Allow port 80 inbound"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port         = 0
+    to_port           = 0
+    protocol          = "-1"
+    cidr_blocks       = ["0.0.0.0/0"]
+    ipv6_cidr_blocks  = ["::/0"]
   }
 
   tags = {
@@ -112,30 +122,30 @@ resource "aws_network_interface" "proj-ni" {
   security_groups  = [aws_security_group.proj-sg.id]
 }
 
-# Attaching an Elastic IP to the network interface
+# Attaching an elastic IP to the network interface
 resource "aws_eip" "proj-eip" {
-  vpc                   = true
-  network_interface     = aws_network_interface.proj-ni.id
+  vpc                  = true
+  network_interface    = aws_network_interface.proj-ni.id
   associate_with_private_ip = "10.0.1.10"
 }
 
-# Creating an Ubuntu EC2 instance
+# Creating an ubuntu EC2 instance
 resource "aws_instance" "Prod-Server" {
-  ami               = "ami-0a0e5d9c7acc336f1"  # Ensure this is a valid AMI for us-east-1
-  instance_type     = "t2.micro"
-  availability_zone = "us-east-1a"  # Use a valid availability zone
-  key_name          = "Key-Pair-Jenkins"
-
+  ami             = "ami-0ef82eeba2c7a0eeb"  # Verify this AMI ID for us-east-1
+  instance_type   = "t2.micro"
+  availability_zone = "us-east-1a"  # Update to us-east-1a
+  key_name        = "shiva-mentor"
+  
   network_interface {
-    device_index          = 0
-    network_interface_id  = aws_network_interface.proj-ni.id
+    device_index            = 0
+    network_interface_id    = aws_network_interface.proj-ni.id
   }
-
+  
   user_data = <<-EOF
     #!/bin/bash
     sudo apt-get update -y
   EOF
-
+  
   tags = {
     Name = "Prod-Server"
   }
