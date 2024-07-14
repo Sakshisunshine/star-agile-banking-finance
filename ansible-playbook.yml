@@ -26,11 +26,11 @@
         fi
       ignore_errors: true
 
-    - name: Pull the latest Docker image
+    - name: Remove existing Docker image if it exists
       docker_image:
         name: sakshi1991/banking-project
-        tag: latest
-        source: pull
+        state: absent
+      ignore_errors: true
 
     - name: Deploy Docker Container
       command: docker run -d --name banking-project-container -p 8084:8081 sakshi1991/banking-project:latest
