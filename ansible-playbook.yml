@@ -26,6 +26,12 @@
         fi
       ignore_errors: true
 
+    - name: Pull the latest Docker image
+      docker_image:
+        name: sakshi1991/banking-project
+        tag: latest
+        source: pull
+
     - name: Deploy Docker Container
       command: docker run -d --name banking-project-container -p 8084:8081 sakshi1991/banking-project:latest
       register: docker_run
