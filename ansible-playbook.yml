@@ -20,7 +20,7 @@
     - name: Stop existing Docker container if it exists
       shell: |
         CONTAINER_NAME=banking-project-container
-        if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+        if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
             docker stop $CONTAINER_NAME
             docker rm $CONTAINER_NAME
         fi
@@ -31,6 +31,6 @@
       register: docker_run
       failed_when: docker_run.rc != 0
 
-    - debug:
+    - name: Display Docker run output
+      debug:
         var: docker_run
-
