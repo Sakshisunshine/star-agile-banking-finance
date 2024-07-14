@@ -27,9 +27,9 @@
       ignore_errors: true
 
     - name: Remove existing Docker image if it exists
-      docker_image:
-        name: sakshi1991/banking-project
-        state: absent
+      shell: |
+        docker rmi -f sakshi1991/banking-project:latest || true
+      register: image_remove
       ignore_errors: true
 
     - name: Deploy Docker Container
