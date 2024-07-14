@@ -71,6 +71,14 @@ resource "aws_security_group" "proj-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+ingress {
+  description = "Prometheus scrape traffic"
+  from_port   = 9090
+  to_port     = 9090
+  protocol    = "tcp"
+  cidr_blocks = ["18.208.128.204/32"]  # Change this to your Prometheus server's IP
+}
+
   egress {
     from_port   = 0
     to_port     = 0
