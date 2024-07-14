@@ -1,36 +1,16 @@
-- name: Configure Docker on EC2 Instances
-  hosts: all
+- name : Configure Docker on EC2 Instances
+  hosts : all
   become: true
-  tasks:
-    - name: Update apt package index
-      apt:
-        update_cache: yes
+  connection : ssh
+  tasks : 
+  - name: updating apt
+    command : sudo apt-get update
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
+  - name : Install Docker
+    command : sudo apt-get install -y docker.io
 
-    - name: Start Docker Service
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
+  - name : Start Docker Service
+    command : sudo systemctl start docker
 
-    - name: Stop existing Docker container if it exists
-      shell: |
-        CONTAINER_NAME=banking-project-container
-        if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
-            docker stop $CONTAINER_NAME
-            docker rm $CONTAINER_NAME
-        fi
-      ignore_errors: true
-
-    - name: Deploy Docker Container
-      command: docker run -d --name banking-project-container -p 8084:8081 sakshi1991/banking-project:1.0
-      register: docker_run
-      failed_when: docker_run.rc != 0
-
-    - name: Display Docker run output
-      debug:
-        var: docker_run
+  - name: Deploy Docker Container
+    command: docker run -itd -p 8084:8081 sakshi1991/banking-project:1.0
