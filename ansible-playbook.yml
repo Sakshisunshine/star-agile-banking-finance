@@ -27,7 +27,7 @@
       ignore_errors: true
 
     - name: Deploy Docker Container
-      command: docker run -d --name banking-project-container -p 8084:8081 sakshi1991/banking-project:latest
+      command: docker run -d --name banking-project-container -p 8084:8081 sakshi1991/banking-project
       register: docker_run
       failed_when: docker_run.rc != 0
 
